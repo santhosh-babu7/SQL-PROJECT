@@ -1,0 +1,104 @@
+ -- Customer Purchase Behavior Analysis System
+ 
+CREATE DATABASE IF NOT EXISTS customer_behavior;
+USE customer_behavior;
+
+-- Table: Customers
+CREATE TABLE customers (
+    customer_id INT PRIMARY KEY,
+    customer_name VARCHAR(100),
+    city VARCHAR(50),
+    registration_date DATE
+);
+
+-- Table: Products
+CREATE TABLE products (
+    product_id INT PRIMARY KEY,
+    product_name VARCHAR(100),
+    category VARCHAR(50),
+    price DECIMAL(10, 2)
+);
+
+-- Table: Transactions
+CREATE TABLE transactions (
+    transaction_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id INT,
+    product_id INT,
+    quantity INT,
+    transaction_date DATE,
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id)
+);
+
+-- Customers
+INSERT INTO customers VALUES
+(1, 'Ravi Kumar', 'Chennai', '2025-01-15'),
+(2, 'Anjali Singh', 'Bangalore', '2025-02-10'),
+(3, 'Zara Khan', 'Delhi', '2025-01-25'),
+(4, 'Rohan Das', 'Hyderabad', '2025-03-05');
+
+-- Products
+INSERT INTO products VALUES
+(101, 'Toor Dal 1kg', 'Pulses', 110.00),
+(102, 'Aashirvaad Atta 5kg', 'Grains', 270.00),
+(103, 'Dove Soap', 'Personal Care', 55.00),
+(104, 'Milk 1L', 'Dairy', 48.00),
+(105, 'Sunflower Oil 1L', 'Oil', 140.00);
+
+-- Transactions
+INSERT INTO transactions (customer_id, product_id, quantity, transaction_date) VALUES
+(1, 101, 2, '2025-07-01'),
+(1, 104, 3, '2025-07-03'),
+(2, 102, 1, '2025-07-01'),
+(2, 103, 2, '2025-07-04'),
+(3, 105, 1, '2025-07-02'),
+(4, 104, 4, '2025-07-05'),
+(3, 103, 1, '2025-07-06');
+
+-- Total Spend by Each Customer
+SELECT 
+    c.customer_name,
+    SUM(p.price * t.quantity) AS total_spent
+FROM 
+    transactions t
+JOIN customers c ON t.customer_id = c.customer_id
+JOIN products p ON t.product_id = p.product_id
+GROUP BY c.customer_name
+ORDER BY total_spent DESC;
+
+-- Top Product Categories by Quantity
+SELECT 
+    p.category,
+    SUM(t.quantity) AS total_units_sold
+FROM 
+    transactions t
+JOIN products p ON t.product_id = p.product_id
+GROUP BY p.category
+ORDER BY total_units_sold DESC;
+
+-- City-Wise Customer Spend
+SELECT 
+    c.city,
+    SUM(p.price * t.quantity) AS total_spent
+FROM 
+    transactions t
+JOIN customers c ON t.customer_id = c.customer_id
+JOIN products p ON t.product_id = p.product_id
+GROUP BY c.city
+ORDER BY total_spent DESC;
+
+-- Total Orders Made by Each Customer
+SELECT 
+    c.customer_name,
+    COUNT(t.transaction_id) AS total_orders
+FROM 
+    transactions t
+JOIN 
+    customers c ON t.customer_id = c.customer_id
+GROUP BY 
+    c.customer_name
+ORDER BY 
+    total_orders DESC;
+
+
+
